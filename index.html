@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VisionAI — Video Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080810;--surface:#10101e;--card:#14142a;--border:#252540;
+  --accent:#e8ff47;--accent2:#ff6b35;--accent3:#7c5cfc;
+  --text:#f0f0f8;--muted:#7070a0;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;
+  min-height:100vh;padding:24px 16px 60px;
+  background-image:radial-gradient(ellipse at 10% 0%,#1a1a3e 0%,transparent 55%),
+                   radial-gradient(ellipse at 90% 100%,#1a0a08 0%,transparent 55%);}
+header{text-align:center;margin-bottom:36px}
+header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,12vw,88px);
+  letter-spacing:4px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+header p{color:var(--muted);font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:28px;max-width:680px;margin:0 auto 24px}
+label{display:block;font-size:10px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.field{margin-bottom:20px}
+input[type=text],textarea{width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:14px;padding:14px 16px;outline:none;transition:border-color .2s}
+input[type=text]:focus,textarea:focus{border-color:var(--accent)}
+textarea{min-height:130px;resize:vertical}
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.platform-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;color:var(--muted)}
+.platform-btn.active{border-color:var(--accent3);color:var(--text);background:rgba(124,92,252,.12)}
+.platform-btn .icon{font-size:22px;margin-bottom:6px}
+.platform-btn .name{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.platform-btn .size{font-size:10px;color:var(--muted);margin-top:2px}
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.style-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:16px;cursor:pointer;transition:all .2s;color:var(--muted)}
+.style-btn.active{border-color:var(--accent);color:var(--text);background:rgba(232,255,71,.06)}
+.style-btn .s-title{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.style-btn .s-sub{font-size:10px;color:var(--muted)}
+.gen-btn{width:100%;padding:18px;background:var(--accent);color:#080810;
+  border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-top:8px}
+.gen-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 40px rgba(232,255,71,.3)}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed}
+.progress-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:24px;max-width:680px;margin:0 auto 24px;display:none}
+.progress-card.visible{display:block}
+.prog-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin:12px 0}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent));
+  border-radius:99px;width:0%;transition:width .6s ease}
+.prog-msg{font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.script-preview{background:var(--card);border-radius:10px;padding:14px;
+  font-size:12px;color:var(--muted);line-height:1.7;font-style:italic;margin-top:14px;display:none}
+.dl-btn{display:none;width:100%;margin-top:16px;padding:16px;
+  background:transparent;border:1px solid var(--accent2);color:var(--accent2);
+  border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:20px;
+  letter-spacing:3px;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none}
+.dl-btn:hover{background:rgba(255,107,53,.1)}
+.err{color:#ff5555;font-size:13px;margin-top:12px}
+.history-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:28px;max-width:680px;margin:0 auto}
+.history-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;
+  color:var(--muted);margin-bottom:18px}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:16px;margin-bottom:12px}
+.hist-tags{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 8px;border-radius:99px;border:1px solid var(--border);color:var(--muted)}
+.tag.platform{border-color:var(--accent3);color:var(--accent3)}
+.tag.style{border-color:var(--accent);color:var(--accent)}
+.hist-topic{font-size:14px;font-weight:600;margin-bottom:6px}
+.hist-script{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.hist-actions{display:flex;gap:8px}
+.hist-dl{padding:8px 16px;background:transparent;border:1px solid var(--accent2);
+  color:var(--accent2);border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;text-decoration:none;letter-spacing:1px}
+.hist-del{padding:8px 12px;background:transparent;border:1px solid var(--border);
+  color:var(--muted);border-radius:8px;font-size:12px;cursor:pointer}
+.hist-del:hover{border-color:#ff5555;color:#ff5555}
+.empty-hist{text-align:center;color:var(--muted);font-size:13px;padding:32px 0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>VisionAI</h1>
+  <p>Turn your words into videos — powered by AI</p>
+</header>
+
+<div class="card">
+  <div class="field">
+    <label>Topic / Search Keywords</label>
+    <input type="text" id="topicInput" placeholder="e.g. Black Mamba snake, lion hunt, motivation..."/>
+  </div>
+
+  <div class="field">
+    <label>Platform</label>
+    <div class="platform-grid">
+      <div class="platform-btn active" data-platform="youtube_shorts" onclick="setPlatform(this)">
+        <div class="icon">📱</div>
+        <div class="name">YouTube Shorts</div>
+        <div class="size">1080×1920 · 9:16</div>
+      </div>
+      <div class="platform-btn" data-platform="tiktok" onclick="setPlatform(this)">
+        <div class="icon">🎵</div>
+        <div class="name">TikTok</div>
+        <div class="size">1080×1920 · 9:16</div>
+      </div>
+      <div class="platform-btn" data-platform="instagram_reels" onclick="setPlatform(this)">
+        <div class="icon">📸</div>
+        <div class="name">Instagram Reels</div>
+        <div class="size">1080×1920 · 9:16</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Video Style</label>
+    <div class="style-grid">
+      <div class="style-btn active" data-style="nature" onclick="setStyle(this)">
+        <div class="s-title">🌿 Nature / Wildlife</div>
+        <div class="s-sub">Cinematic documentary style</div>
+      </div>
+      <div class="style-btn" data-style="news" onclick="setStyle(this)">
+        <div class="s-title">📰 News / Educational</div>
+        <div class="s-sub">Clear, authoritative tone</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Your Script</label>
+    <textarea id="scriptInput" placeholder="Write your script here… AI will rewrite and enhance it for you."></textarea>
+  </div>
+
+  <button class="gen-btn" onclick="generateVideo()">GENERATE VIDEO ▶</button>
+</div>
+
+<div class="progress-card" id="progressCard">
+  <label>Generating your video…</label>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+  <div class="prog-msg" id="progMsg"><div class="spinner"></div><span>Starting…</span></div>
+  <div class="script-preview" id="scriptPreview"></div>
+  <a class="dl-btn" id="dlBtn" href="#" download="visionai_video.mp4">⬇ DOWNLOAD VIDEO</a>
+  <div class="err" id="errMsg"></div>
+</div>
+
+<div class="history-card">
+  <div class="history-title">Past Generations</div>
+  <div id="historyList"><div class="empty-hist">No videos yet — generate your first one above!</div></div>
+</div>
+
+<script>
+let selectedPlatform = "youtube_shorts";
+let selectedStyle = "nature";
+let pollTimer = null;
+
+function setPlatform(btn){
+  document.querySelectorAll('.platform-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPlatform = btn.dataset.platform;
+}
+function setStyle(btn){
+  document.querySelectorAll('.style-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedStyle = btn.dataset.style;
+}
+
+async function generateVideo(){
+  const topic = document.getElementById('topicInput').value.trim();
+  const script = document.getElementById('scriptInput').value.trim();
+  if(!topic||!script){alert('Please enter both a topic and a script!');return;}
+
+  const btn = document.querySelector('.gen-btn');
+  const card = document.getElementById('progressCard');
+  const dlBtn = document.getElementById('dlBtn');
+  const errMsg = document.getElementById('errMsg');
+  const scriptPreview = document.getElementById('scriptPreview');
+
+  btn.disabled = true;
+  card.classList.add('visible');
+  dlBtn.style.display = 'none';
+  errMsg.textContent = '';
+  scriptPreview.style.display = 'none';
+  setProgress(5, 'Starting…');
+
+  try{
+    const res = await fetch('/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({topic, script, style:selectedStyle, platform:selectedPlatform})
+    });
+    const data = await res.json();
+    if(!res.ok||data.error){showError(data.error||'Failed to start.');btn.disabled=false;return;}
+    pollJob(data.job_id, btn, dlBtn, errMsg, scriptPreview);
+  }catch(e){showError('Could not reach server. Check your connection.');btn.disabled=false;}
+}
+
+function pollJob(jobId, btn, dlBtn, errMsg, scriptPreview){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async()=>{
+    try{
+      const res = await fetch(`/status/${jobId}`);
+      const job = await res.json();
+      setProgress(job.progress||5, job.step||'Processing…');
+      if(job.status==='done'){
+        clearInterval(pollTimer);
+        setProgress(100,'✅ Video ready!');
+        if(job.rewritten_script){
+          scriptPreview.textContent = `"${job.rewritten_script}"`;
+          scriptPreview.style.display = 'block';
+        }
+        dlBtn.href = job.download_url;
+        dlBtn.style.display = 'block';
+        btn.disabled = false;
+        loadHistory();
+      } else if(job.status==='error'){
+        clearInterval(pollTimer);
+        showError(job.error||'Video generation failed.');
+        btn.disabled = false;
+      }
+    }catch(e){/* retry next tick */}
+  }, 2000);
+}
+
+function setProgress(pct, msg){
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progMsg').innerHTML =
+    `<div class="spinner"></div><span>${msg}</span>`;
+}
+
+function showError(msg){
+  document.getElementById('errMsg').textContent = '❌ '+msg;
+  document.getElementById('progMsg').innerHTML = `<span style="color:#ff5555">Failed</span>`;
+}
+
+async function loadHistory(){
+  try{
+    const res = await fetch('/history');
+    const entries = await res.json();
+    const list = document.getElementById('historyList');
+    if(!entries.length){
+      list.innerHTML='<div class="empty-hist">No videos yet — generate your first one above!</div>';
+      return;
+    }
+    list.innerHTML = entries.map(e=>`
+      <div class="hist-item">
+        <div class="hist-tags">
+          <span class="tag platform">${e.platform?.replace('_',' ')}</span>
+          <span class="tag style">${e.style}</span>
+        </div>
+        <div class="hist-topic">${e.topic}</div>
+        <div class="hist-script">${(e.rewritten_script||'').slice(0,120)}…</div>
+        <div class="hist-actions">
+          ${e.available?`<a class="hist-dl" href="${e.download_url}" download="visionai_video.mp4">⬇ Download</a>`:'<span class="hist-dl" style="opacity:.4">Expired</span>'}
+          <button class="hist-del" onclick="deleteHistory('${e.job_id}')">🗑</button>
+        </div>
+      </div>`).join('');
+  }catch(e){}
+}
+
+async function deleteHistory(jobId){
+  await fetch(`/history/${jobId}`,{method:'DELETE'});
+  loadHistory();
+}
+
+loadHistory();
+</script>
+</body>
+</html>
