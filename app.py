@@ -190,7 +190,9 @@ def download_video(url, dest):
 
 # ── Voiceover ─────────────────────────────────────────────────────────────────
 def generate_voiceover(text, output_path):
-    tts = gTTS(text=text, lang="en", slow=False)
+    import time
+time.sleep(2)
+tts = gTTS(text=text, lang="en", slow=False)
     tts.save(output_path)
 
 # ── FFmpeg video compilation ──────────────────────────────────────────────────
