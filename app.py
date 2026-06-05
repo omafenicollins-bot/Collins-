@@ -246,7 +246,7 @@ def compile_video_ffmpeg(video_clips, audio_path, output_path, script_text, plat
     subprocess.run([
         "ffmpeg", "-y", "-f", "concat", "-safe", "0",
         "-i", concat_list, "-t", str(audio_duration),
-        "-c:v", "libx264", "-preset", "fast", "-crf", "28", base_video
+        "-c:v", "libx264", "-preset","ultrafast", "-crf", "28", base_video
     ], capture_output=True)
 
     words = script_text.split() if script_text.strip() else []
