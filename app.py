@@ -229,7 +229,7 @@ def compile_video_ffmpeg(video_clips, audio_path, output_path, script_text, plat
             "-t", str(clip_duration),
             "-vf", f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,"
                    f"crop={target_w}:{target_h}",
-            "-c:v", "libx264", "-preset", "fast", "-crf", "28",
+            "-preset", "ultrafast", "-crf", "28",
             "-an", out
         ], capture_output=True)
         if Path(out).exists():
