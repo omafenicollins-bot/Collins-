@@ -182,7 +182,7 @@ def generate_voiceover(text, output_path):
     # Use espeak via ffmpeg - works offline, no rate limits
     wav_path = output_path.replace(".mp3", ".wav")
     result = subprocess.run([
-        "espeak", "-t", text,
+        "espeak-ng", "-t", text,
         "-w", wav_path,
         "-s", "150",
         "-v", "en-us"
