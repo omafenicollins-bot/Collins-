@@ -177,20 +177,20 @@ def download_video(url, dest):
         return True
     except Exception:
         return False
-
 def generate_voiceover(text, output_path):
-    url = "https://api.voicerss.org/"
-    params = {
-        "key": "demo",
-        "hl": "en-us",
-        "v": "John",
-        "src": text,
-        "c": "MP3",
-        "f": "22khz_16bit_mono"
-    }
-    r = requests.get(url, params=params, timeout=30)
-    with open(output_path, "wb") as f:
-        f.write(r.content)
+    from gtts import gTTS
+    import time
+    for attempt in range(3):
+        try:
+            time.sleep(5)
+            tts = gTTS(text=text, lang="en", slow=False)
+            tts.save(output_path)
+            return
+        except Exception as e:
+            if attempt == 2:
+                raise e
+            time.sleep(10)
+
 
 def get_audio_duration(audio_path):
     result = subprocess.run(
